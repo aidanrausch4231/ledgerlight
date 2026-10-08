@@ -1,5 +1,7 @@
 # ledgerlight
 
+![ledgerlight Home dashboard with spending, cash flow, upcoming bills and net worth cards (synthetic demo data)](docs/images/home.png)
+
 Free, self-hosted personal finance with an agent-native CLI. This is a runnable
 **v1 stage 8**: Plaid linking/sync, transactions, recurring streams, daily balance
 snapshots and net worth, budgets, merchant rules, in-app alerts, notes/tags/splits,
@@ -11,7 +13,29 @@ and propose financial changes for explicit confirmation. Optional push-to-talk
 fills the message input without sending it.
 Licensed under the MIT License; see LICENSE and THIRD_PARTY_NOTICES.md.
 
+## Use with Claude Code
+
+This repo is also a Claude Code plugin marketplace. In Claude Code, run:
+
+```text
+/plugin marketplace add aidanrausch4231/ledgerlight
+/plugin install ledgerlight@ledgerlight
+```
+
+You get the ledgerlight MCP server (read tools, live UI and dashboard tools, and
+confirm-first proposal tools; see **MCP: external agents and inline charts**) and
+the `ledgerlight` skill, which drives the CLI. The plugin starts the server with
+`uvx --from git+https://github.com/aidanrausch4231/ledgerlight ledgerlight mcp`,
+so you need only [uv](https://docs.astral.sh/uv/), not a local install. Restart
+Claude Code after installing. Demo data needs no credentials (`ledgerlight demo seed`;
+use a separate data directory as shown in **Setup and try it**); Plaid keys are
+needed only for real bank linking. For the web UI and confirmation links, run
+`ledgerlight serve` from a built checkout (see **Setup and try it**). The plugin skill is a copy of
+`src/ledgerlight/SKILL.md`; `tests/test_plugin.py` fails if they differ.
+
 ## Ask a question and keep your Home layout
+
+![Chat drawer answering a coffee spending question with monthly and top-merchant charts (synthetic demo data, offline fake provider)](docs/images/ask.png)
 
 Ask chat “hey what was my coffee spend like” and press Enter (Shift+Enter for a
 newline). The agent is instructed to call `spending ask` once, then show an Answer
@@ -45,6 +69,8 @@ MCP adds read tool `spending_ask` and layout tool `dashboard_reset_default`.
 See packaged `src/ledgerlight/SKILL.md` for complete shapes and edge semantics.
 
 ## Accounts overview
+
+![Accounts page with a net worth ring and cash and owed account groups (synthetic demo data)](docs/images/accounts.png)
 
 Accounts shows a cash/invested ring with an inner owed arc, signed net worth,
 and a ranked ledger grouped by Investments, Cash and Owed. Asset groups sort by
@@ -197,6 +223,8 @@ and `web/playwright-report` (if produced) for seven days when the e2e job fails.
 Inspect a downloaded trace with `cd web && pnpm exec playwright show-trace PATH`.
 Traces include DOM/network data; share only synthetic runs and treat live Sandbox
 traces as sensitive.
+Regenerate README screenshots (synthetic demo data, temporary storage) after
+`pnpm build` with `node scripts/screenshots.mjs`.
 
 The saved-provider regression has a 120-second budget, including up to 60 seconds
 for its separate cold server to become healthy. It holds real status responses
@@ -377,6 +405,8 @@ them). To disable: `systemctl --user disable --now ledgerlight.timer`.
 
 ## Money management
 
+![Budgets page with four category budgets, one over its limit (synthetic demo data)](docs/images/budgets.png)
+
 Use **Budgets**, **Rules**, **Goals**, **Bills**, and **Settings** in the web
 navigation. Transactions have an expandable note/tag/hide/split editor and
 “Create rule from this”. Rules preview their match count and automatically
@@ -445,6 +475,8 @@ rule precedence/undo, splits, sync preservation, budget/spending math, alert
 deduplication and savings progress.
 
 ## Live card dashboard and Tide Table UI
+
+![Home dashboard in the dark Tide Table theme (synthetic demo data)](docs/images/home-dark.png)
 
 Home seeds a persistent nine-card layout once, with live spending comparison,
 cash flow, upcoming bills, net worth, budgets, savings goals, alerts, recent

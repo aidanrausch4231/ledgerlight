@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "ledgerlight": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/aidanrausch4231/ledgerlight",
+        "ledgerlight",
+        "mcp"
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "ledgerlight",
+  "owner": {
+    "name": "aidanrausch4231"
+  },
+  "metadata": {
+    "description": "Self-hosted personal finance with an agent-native CLI and MCP server."
+  },
+  "plugins": [
+    {
+      "name": "ledgerlight",
+      "source": "./plugins/ledgerlight",
+      "description": "ledgerlight MCP tools (accounts, spending, charts, dashboard) plus the ledgerlight CLI skill.",
+      "author": {
+        "name": "aidanrausch4231"
+      },
+      "category": "productivity"
+    }
+  ]
+}

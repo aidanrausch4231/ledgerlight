@@ -1,0 +1,12 @@
+{
+  "name": "ledgerlight",
+  "version": "0.1.0",
+  "description": "ledgerlight MCP tools (accounts, spending, charts, dashboard) plus the ledgerlight CLI skill. Runs locally via uvx; demo data works without credentials.",
+  "author": {
+    "name": "aidanrausch4231"
+  },
+  "homepage": "https://github.com/aidanrausch4231/ledgerlight",
+  "repository": "https://github.com/aidanrausch4231/ledgerlight",
+  "license": "MIT",
+  "keywords": ["finance", "budget", "mcp", "plaid", "self-hosted"]
+}
