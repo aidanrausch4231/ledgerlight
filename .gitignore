@@ -1,0 +1,22 @@
+.env
+.env.*
+!.env.example
+*.db
+*.db-*
+key
+.key-*
+*.key
+*.pem
+.venv/
+__pycache__/
+*.py[cod]
+node_modules/
+web/dist/
+.pytest_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+.checks/
+
+# design screenshots (binary, local reference only)
+design/mockups/shots/

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "name": "ledgerlight v1 stage 1: Plaid, sync, transactions, recurring, net worth",
+  "workflow": "astra",
+  "tasks": [
+    {
+      "key": "build",
+      "role": "engineer",
+      "assignment": {"executor": "pi", "provider": "openai-codex", "model": "gpt-6-astra"},
+      "description": "You are the BUILDER for this task: edit files and run checks yourself; you are not a lead and must not delegate. Implement everything in task-briefs/ledgerlight-v1/stage1-plaid-data.md, following task-briefs/ledgerlight-v1/decisions.md (binding). Run `bash scripts/check.sh` until it exits 0. On a correction round, read the reviewer findings in your inputs and fix every one. Publish build-report in the format decisions.md gives.",
+      "tool_policy": {"mode": "automatic"},
+      "permissions": {
+        "read": ["."],
+        "write": ["src", "tests", "web", "scripts", "deploy", "README.md", "AGENTS.md", "context.md", "specs/context.md", "pyproject.toml", "uv.lock", ".gitignore"],
+        "approved_commands": [],
+        "allow_approval_requests": false
+      },
+      "acceptance": {
+        "outputs": [{"name": "build-report", "kind": "build_report", "nonempty": true}],
+        "reviewers": ["review"],
+        "checks": [
+          {"type": "command", "command": {"executable": "/bin/bash", "args": ["scripts/check.sh"], "timeout_ms": 1800000}},
+          {"type": "command", "command": {"executable": "/bin/bash", "args": ["-c", "export PATH=$HOME/.local/bin:/usr/bin:/bin; uv run ledgerlight --json systemd print | python3 -c 'import json,sys; d=json.load(sys.stdin); assert \"OnCalendar\" in d[\"timer\"] and \"ledgerlight sync\" in d[\"service\"]'"], "timeout_ms": 300000}}
+        ]
+      },
+      "retry": {"max_attempts": 3, "automatic_transient": false},
+      "timeout_ms": 10800000
+    },
+    {
+      "key": "review",
+      "role": "reviewer",
+      "assignment": {"executor": "pi", "provider": "openai-codex", "model": "gpt-5.6-sol"},
+      "review_of": "build",
+      "workspace_from": "build",
+      "dependencies": [{"task": "build", "condition": "candidate_ready", "on_failure": "block", "version": null}],
+      "description": "You are the independent REVIEWER: read-only, never edit files. Review the build candidate (git diff against HEAD plus untracked files) against task-briefs/ledgerlight-v1/stage1-plaid-data.md and task-briefs/ledgerlight-v1/decisions.md. Run `bash scripts/check.sh` yourself. Check: every Build item done, no real secrets or account data, tokens stored encrypted, fakes only enabled by env var, CLI/API share functions, SKILL.md complete, schema migration safe on an old DB. First line of review-report: VERIFIED or REFUTED. Then findings ranked by severity with path:line and the exact fix. Only REFUTE for real defects or missing brief items, not style.",
+      "tool_policy": {"mode": "automatic"},
+      "permissions": {"read": ["."], "write": [], "approved_commands": [], "allow_approval_requests": false},
+      "acceptance": {"outputs": [{"name": "review-report", "kind": "independent_review", "nonempty": true}], "checks": [], "reviewers": []},
+      "retry": {"max_attempts": 3, "automatic_transient": false},
+      "timeout_ms": 3600000
+    }
+  ],
+  "loops": [
+    {"key": "loop-build", "kind": "correction", "members": ["build", "review"], "max_rounds": 2}
+  ]
+}

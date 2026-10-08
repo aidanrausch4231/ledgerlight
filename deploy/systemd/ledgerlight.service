@@ -1,0 +1,6 @@
+[Unit]
+Description=Sync ledgerlight accounts and daily balances
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/ledgerlight sync

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledgerlight Directions</title>
+<style>
+:root{--bg:#EEEFF1;--card:#FFFFFF;--ink:#16181D;--ink-2:#4A505C;--rule:#D3D6DC;--acc:#16181D;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111317;--card:#1A1D23;--ink:#ECEEF2;--ink-2:#A9AFBB;--rule:#2C3039;--acc:#ECEEF2;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111317;--card:#1A1D23;--ink:#ECEEF2;--ink-2:#A9AFBB;--rule:#2C3039;--acc:#ECEEF2;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding:28px 24px 18px;max-width:2200px;margin:0 auto}
+h1{font-size:24px;line-height:1.2;margin:0 0 4px;letter-spacing:-.01em}
+header p{margin:0;color:var(--ink-2);max-width:70ch}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:13.5px;border:0;background:var(--card);color:var(--ink-2);padding:7px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--bg)}
+.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;padding:0 24px 40px;max-width:2200px;margin:0 auto}
+.dir{background:var(--card);border:1px solid var(--rule);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.meta{padding:16px 18px 14px}
+.meta h2{margin:0 0 6px;font-size:18px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.meta h2 a{font-size:13px;font-weight:500;color:var(--ink-2)}
+.meta p{margin:0;color:var(--ink-2);font-size:14px}
+.frame{position:relative;aspect-ratio:1440/900;border-top:1px solid var(--rule);overflow:hidden;background:var(--bg)}
+.frame iframe{position:absolute;top:0;left:0;width:1440px;height:900px;border:0;transform-origin:0 0}
+a{color:inherit;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+@media (max-width:1100px){.row{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:600px){header{padding:20px 16px 14px}.row{padding:0 16px 32px;gap:16px}
+  .frame{aspect-ratio:375/700}.frame iframe{width:375px;height:700px}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>ledgerlight home: three directions</h1>
+    <p>Same synthetic data in each. The agent has just moved “Dining vs last month” to the top-left and proposes a $400 Dining budget. Open any direction full size for its own light/dark toggle.</p>
+  </div>
+  <div class="seg" role="group" aria-label="Theme for previews">
+    <button data-t="" aria-pressed="true">Auto</button><button data-t="light" aria-pressed="false">Light</button><button data-t="dark" aria-pressed="false">Dark</button>
+  </div>
+</header>
+<main class="row">
+  <section class="dir">
+    <div class="meta">
+      <h2>1 · Tide Table <a href="direction-1-tide-table.html">Open</a></h2>
+      <p>A harbour almanac: calm serif figures, sea-mist chart paper and depth-blue water, with the agent’s marks printed in chart magenta, the colour real charts use for overprinted notices. Money reads as tides: bills sit in a tide table under a projected “low water” line for Checking.</p>
+    </div>
+    <div class="frame"><iframe src="direction-1-tide-table.html" title="Direction 1, Tide Table" loading="lazy"></iframe></div>
+  </section>
+  <section class="dir">
+    <div class="meta">
+      <h2>2 · Gridwork <a href="direction-2-gridwork.html">Open</a></h2>
+      <p>A dense instrument panel on a visible construction grid with lettered columns and numbered rows. Every card has a cell address, so the agent’s moves are literal and auditable: “I9:L12 → A1:D4”, a ghost where the card was and a traced route along the gutters.</p>
+    </div>
+    <div class="frame"><iframe src="direction-2-gridwork.html" title="Direction 2, Gridwork" loading="lazy"></iframe></div>
+  </section>
+  <section class="dir">
+    <div class="meta">
+      <h2>3 · Envelope <a href="direction-3-envelope.html">Open</a></h2>
+      <p>The envelope-budgeting ritual made tactile: coloured envelope stock on a kraft desk, folder-tab navigation, rubber stamps for status and a typed routing slip for bills. The agent works in blue stamp ink, and its proposals arrive as a form that needs your OK.</p>
+    </div>
+    <div class="frame"><iframe src="direction-3-envelope.html" title="Direction 3, Envelope" loading="lazy"></iframe></div>
+  </section>
+</main>
+<script>
+(function(){
+  function fit(){document.querySelectorAll('.frame').forEach(function(f){var i=f.querySelector('iframe');i.style.transform='scale('+(f.clientWidth/i.offsetWidth)+')';});}
+  addEventListener('resize',fit);addEventListener('load',fit);fit();
+  document.querySelectorAll('.seg button').forEach(function(b){b.addEventListener('click',function(){
+    var t=b.dataset.t;document.querySelectorAll('.seg button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});
+    if(t)document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme;
+    document.querySelectorAll('.frame iframe').forEach(function(i){i.src=i.src.split('?')[0]+(t?'?theme='+t:'');});
+  });});
+})();
+</script>
+</body>
+</html>

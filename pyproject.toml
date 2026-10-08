@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ledgerlight"
+version = "0.1.0"
+description = "Self-hosted personal finance, with an agent-native CLI"
+requires-python = ">=3.12"
+dependencies = [
+  "ag-ui-protocol==1.0.0",
+  "httpx>=0.28",
+  "click>=8.1",
+  "cryptography>=44",
+  "fastapi>=0.115",
+  "plaid-python>=29",
+  "uvicorn>=0.34",
+  "fastmcp>=4.0.10",
+]
+
+[project.optional-dependencies]
+voice = ["faster-whisper"]
+
+[project.scripts]
+ledgerlight = "ledgerlight.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.11"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ledgerlight"]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

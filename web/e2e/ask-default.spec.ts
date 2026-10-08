@@ -1,0 +1,102 @@
+import { test, expect } from '@playwright/test'
+import { execFileSync } from 'node:child_process'
+
+test('coffee Enter sends two answer charts; save pins a card, themes and replacement work', async ({ page, request }) => {
+  test.skip(process.env.LEDGERLIGHT_E2E_PLAID === 'sandbox', 'Offline fake only')
+  await request.post('/api/plaid/exchange', { data: { public_token: 'public-synthetic-ledgerlight' } })
+  await request.post('/api/sync')
+  const root = process.env.LEDGERLIGHT_E2E_STORAGE
+  if (!root) throw new Error('Isolated test storage is required')
+  execFileSync('uv', ['run', 'ledgerlight', '--json', 'demo', 'seed'], {
+    cwd: '..', env: { ...process.env, LEDGERLIGHT_DATA_DIR: `${root}/data`, LEDGERLIGHT_CONFIG_DIR: `${root}/config`, LEDGERLIGHT_TODAY: '2026-03-15' },
+  })
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await page.goto('/')
+  await expect(page.getByText('Live UI connected')).toBeVisible()
+  const original = await (await request.get('/api/dashboard')).json()
+  const calls: string[] = []
+  let agentRequests = 0
+  page.on('request', request => { if (request.url().endsWith('/api/agent')) agentRequests++ })
+  page.on('response', async response => {
+    if (response.url().endsWith('/api/agent')) {
+      const text = await response.text()
+      for (const line of text.split('\n').filter(l => l.startsWith('data: '))) {
+        const e = JSON.parse(line.slice(6))
+        if (e.type === 'TOOL_CALL_START') calls.push(e.toolCallName)
+      }
+    }
+  })
+  await page.getByRole('button', { name: 'Chat', exact: true }).click()
+  const message = page.getByRole('textbox', { name: 'Message', exact: true })
+  await message.fill('hey what was my coffee spend like')
+  await message.press('Shift+Enter')
+  await expect(message).toHaveValue('hey what was my coffee spend like\n')
+  await message.press('Enter')
+  const panel = page.getByRole('region', { name: 'Answer', exact: true })
+  await expect(panel).toBeVisible()
+  await expect(panel.locator('.chart svg')).toHaveCount(2)
+  await expect(page.getByText('Working…', { exact: true })).toHaveCount(0, { timeout: 5000 })
+  await expect(page.getByRole('button', { name: 'Send', exact: true })).toBeVisible()
+  expect(agentRequests).toBe(1) // show_answer must not start a continuation request.
+  await expect.poll(() => calls).toEqual(['run_ledgerlight', 'show_answer'])
+  expect(await panel.evaluate(el => !!el.closest('[data-ui-id="dashboard"]'))).toBe(false)
+  await page.getByRole('button', { name: 'Close chat', exact: true }).click()
+  await panel.getByRole('button', { name: 'Add to dashboard', exact: true }).first().click()
+  await expect(panel.getByRole('button', { name: 'Added to dashboard' })).toBeVisible()
+  await expect.poll(async () => (await (await request.get('/api/dashboard')).json()).cards.length).toBe(original.cards.length + 1)
+  const saved = await (await request.get('/api/dashboard')).json()
+  const card = saved.cards.find((c: { id: string }) => !original.cards.some((o: { id: string }) => o.id === c.id))
+  expect(card.kind).toBe('chart')
+  // Tide Table colors update for an already rendered chart, not just on reload.
+  await page.getByRole('button', { name: 'Toggle dark mode' }).click()
+  await expect(panel.locator('svg text').first()).toHaveAttribute('fill', /#9db6ba/i)
+  await page.getByRole('button', { name: 'Toggle dark mode' }).click()
+  await expect(panel.locator('svg text').first()).toHaveAttribute('fill', /#3d5864/i)
+  await page.getByRole('link', { name: 'Transactions', exact: true }).click()
+  await expect(panel).toBeVisible()
+  await page.getByRole('button', { name: 'Chat', exact: true }).click()
+  await message.fill('how much coffee')
+  await message.press('Enter')
+  await expect.poll(() => calls.length).toBe(4)
+  await expect(panel).toHaveCount(1)
+  await page.getByRole('button', { name: 'Close chat', exact: true }).click()
+  await panel.getByRole('button', { name: 'Dismiss', exact: true }).click()
+  await expect(panel).toHaveCount(0)
+  await page.goto('/')
+  await expect(page.locator(`[data-card-id="${card.id}"] svg`)).toBeVisible()
+  expect(errors).toEqual([])
+})
+
+test('Home saved default restores moved cards with Undo and persists after reload', async ({ page, request }) => {
+  test.skip(process.env.LEDGERLIGHT_E2E_PLAID === 'sandbox', 'Offline fake only')
+  await page.goto('/')
+  await expect(page.getByText('Live UI connected')).toBeVisible()
+  const card = page.locator('[data-card-id="cashflow"]')
+  await card.getByText('Card controls', { exact: true }).click()
+  await card.getByLabel('Row', { exact: true }).fill('30')
+  await card.getByRole('button', { name: 'Move card', exact: true }).click()
+  await expect(card).toHaveAttribute('data-y', '30')
+  await page.getByRole('button', { name: 'Set as default', exact: true }).click()
+  await expect(page.getByText('Default layout saved')).toBeVisible()
+  await card.getByLabel('Row', { exact: true }).fill('40')
+  await card.getByRole('button', { name: 'Move card', exact: true }).click()
+  await expect(card).toHaveAttribute('data-y', '40')
+  await page.getByRole('button', { name: 'Reset to default', exact: true }).click()
+  await expect(card).toHaveAttribute('data-y', '30')
+  await expect(page.locator('.receipt')).toContainText('Restored default Home layout')
+  await page.locator('.receipt').getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(card).toHaveAttribute('data-y', '40')
+  await page.getByRole('button', { name: 'Reset to default', exact: true }).click()
+  await expect(card).toHaveAttribute('data-y', '30')
+  await page.getByRole('link', { name: 'Accounts', exact: true }).click()
+  await expect(page.locator('.receipt')).toHaveCount(0)
+  await page.goto('/')
+  await expect(card).toHaveAttribute('data-y', '30')
+  await request.post('/api/dashboard/move', { data: { id: 'cashflow', x: 0, y: 35, actor: 'cli' } })
+  await expect(page.locator('.receipt')).toContainText('CLI moved Cash flow')
+  await expect(card.locator('.overprint')).toContainText('CLI moved Cash flow')
+  await page.getByRole('link', { name: 'Accounts', exact: true }).click()
+  await expect(page.locator('.receipt')).toHaveCount(0)
+})

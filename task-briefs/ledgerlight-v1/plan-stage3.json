@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "name": "ledgerlight v1 stage 3: design, app shell, live dashboard, UI bus",
+  "workflow": "astra",
+  "tasks": [
+    {
+      "key": "build",
+      "role": "engineer",
+      "assignment": {
+        "executor": "pi",
+        "provider": "openai-codex",
+        "model": "gpt-6-astra"
+      },
+      "description": "You are the BUILDER for this task: edit files and run checks yourself; you are not a lead and must not delegate. Implement everything in task-briefs/ledgerlight-v1/stage3-ui-dashboard.md after reading task-briefs/ledgerlight-v1/stage2-notes.md, following task-briefs/ledgerlight-v1/decisions.md (binding). Run `bash scripts/check.sh` until it exits 0. On a correction round, read the reviewer findings in your inputs and fix every one. Publish build-report in the format decisions.md gives. HARNESS: `.env.example` always appears deleted (harness strips .env*; never integrated) and untracked files under task-briefs/ and design/ are lead inputs — ignore both, never report or change them.",
+      "tool_policy": {
+        "mode": "automatic"
+      },
+      "permissions": {
+        "read": [
+          "."
+        ],
+        "write": [
+          "src",
+          "tests",
+          "web",
+          "scripts",
+          "deploy",
+          "README.md",
+          "AGENTS.md",
+          "context.md",
+          "specs/context.md",
+          "pyproject.toml",
+          "uv.lock",
+          ".gitignore",
+          "design"
+        ],
+        "approved_commands": [],
+        "allow_approval_requests": false
+      },
+      "acceptance": {
+        "outputs": [
+          {
+            "name": "build-report",
+            "kind": "build_report",
+            "nonempty": true
+          }
+        ],
+        "reviewers": [
+          "review"
+        ],
+        "checks": [
+          {
+            "type": "command",
+            "command": {
+              "executable": "/bin/bash",
+              "args": [
+                "scripts/check.sh"
+              ],
+              "timeout_ms": 1800000
+            }
+          }
+        ]
+      },
+      "retry": {
+        "max_attempts": 4,
+        "automatic_transient": false
+      },
+      "timeout_ms": 14400000
+    },
+    {
+      "key": "review",
+      "role": "reviewer",
+      "assignment": {
+        "executor": "pi",
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol"
+      },
+      "review_of": "build",
+      "workspace_from": "build",
+      "dependencies": [
+        {
+          "task": "build",
+          "condition": "candidate_ready",
+          "on_failure": "block",
+          "version": null
+        }
+      ],
+      "description": "You are the independent REVIEWER: read-only, never edit files. Review the build candidate (git diff against HEAD plus untracked files) against task-briefs/ledgerlight-v1/stage3-ui-dashboard.md and task-briefs/ledgerlight-v1/decisions.md. Run `bash scripts/check.sh` yourself. Check every Build item is done and tested, SKILL.md is complete, schema migration is safe on the previous stage DB, CLI/API/other entry points share one function per behavior, no secrets or real data. Focus: the build matches design/mockups/CHOSEN.md tokens and layout; SSE replay and ordering; undo restores exact prior layout; UI command targets are stable data-ui-id; 375px has no horizontal scroll; uiBus functions exported for stage 4. First line of review-report: VERIFIED or REFUTED. Then findings ranked by severity with path:line and the exact fix. Only REFUTE for real defects or missing brief items, not style. HARNESS: `.env.example` always appears deleted (harness strips .env*; never integrated) and untracked files under task-briefs/ and design/ are lead inputs — ignore both, never report or change them.",
+      "tool_policy": {
+        "mode": "automatic"
+      },
+      "permissions": {
+        "read": [
+          "."
+        ],
+        "write": [],
+        "approved_commands": [],
+        "allow_approval_requests": false
+      },
+      "acceptance": {
+        "outputs": [
+          {
+            "name": "review-report",
+            "kind": "independent_review",
+            "nonempty": true
+          }
+        ],
+        "checks": [],
+        "reviewers": []
+      },
+      "retry": {
+        "max_attempts": 3,
+        "automatic_transient": false
+      },
+      "timeout_ms": 3600000
+    }
+  ],
+  "loops": [
+    {
+      "key": "loop-build",
+      "kind": "correction",
+      "members": [
+        "build",
+        "review"
+      ],
+      "max_rounds": 3
+    }
+  ]
+}

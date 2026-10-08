@@ -1,0 +1,41 @@
+/* Tide Table: the single source of design tokens, light and night charts.
+   Fonts are bundled locally under their SIL Open Font Licenses; no remote requests. */
+@font-face {
+  font-family: 'Source Serif 4'; src: url('/fonts/sourceserif4.ttf') format('truetype');
+  font-style: normal; font-weight: 200 900; font-display: swap;
+}
+@font-face {
+  font-family: 'Schibsted Grotesk'; src: url('/fonts/schibstedgrotesk.ttf') format('truetype');
+  font-style: normal; font-weight: 400 900; font-display: swap;
+}
+:root {
+  --ground: #E4ECE9; --surface: #F6F9F8; --panel: #D9E6E4;
+  --ink: #0F2A39; --ink-2: #3D5864; --ink-3: #55707A;
+  --rule: #B8CBCA; --rule-soft: #D2DFDD; --water: #C3DCE0; --water-deep: #3F7F93;
+  --overprint: #A11F6D; --overprint-wash: rgba(161,31,109,.07); --overprint-ink: #FFFFFF;
+  --caution: #8F4310; --caution-wash: #F1E3C4; --pos: #1D6A58;
+  --serif: 'Source Serif 4', Georgia, serif; --sans: 'Schibsted Grotesk', system-ui, sans-serif;
+  --space: 4px; --card-radius: 10px; --button-radius: 7px; --pill-radius: 999px; --notice-radius: 8px;
+  --grid-gap: 18px; --card-padding: 18px 20px; --rail-width: 212px;
+  --shadow: 0 1px 0 rgba(15,42,57,.04); --moved-shadow: 0 12px 24px -16px rgba(5,20,28,.45);
+  --settle: 600ms cubic-bezier(.16,1,.3,1);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #071620; --surface: #0D202B; --panel: #112E3C;
+    --ink: #D5E6E4; --ink-2: #9DB6BA; --ink-3: #7E989E;
+    --rule: #24404D; --rule-soft: #1A3340; --water: #1A4253; --water-deep: #6DB0C2;
+    --overprint: #EE7CC0; --overprint-wash: rgba(238,124,192,.09); --overprint-ink: #2A0A1C;
+    --caution: #E9AC62; --caution-wash: #2E2614; --pos: #74C9AE;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #071620; --surface: #0D202B; --panel: #112E3C;
+  --ink: #D5E6E4; --ink-2: #9DB6BA; --ink-3: #7E989E;
+  --rule: #24404D; --rule-soft: #1A3340; --water: #1A4253; --water-deep: #6DB0C2;
+  --overprint: #EE7CC0; --overprint-wash: rgba(238,124,192,.09); --overprint-ink: #2A0A1C;
+  --caution: #E9AC62; --caution-wash: #2E2614; --pos: #74C9AE;
+  color-scheme: dark;
+}

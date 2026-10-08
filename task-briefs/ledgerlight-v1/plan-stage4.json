@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "name": "ledgerlight v1 stage 4: AG-UI agent, confirm cards, push-to-talk, charts, HTML sandbox",
+  "workflow": "astra",
+  "tasks": [
+    {
+      "key": "build",
+      "role": "engineer",
+      "assignment": {
+        "executor": "pi",
+        "provider": "openai-codex",
+        "model": "gpt-6-astra"
+      },
+      "description": "You are the BUILDER for this task: edit files and run checks yourself; you are not a lead and must not delegate. Implement everything in task-briefs/ledgerlight-v1/stage4-agent.md after reading task-briefs/ledgerlight-v1/stage3-notes.md, following task-briefs/ledgerlight-v1/decisions.md (binding). Run `bash scripts/check.sh` until it exits 0. On a correction round, read the reviewer findings in your inputs and fix every one. Publish build-report in the format decisions.md gives. HARNESS: `.env.example` always appears deleted (harness strips .env*; never integrated) and untracked files under task-briefs/ and design/ are lead inputs — ignore both, never report or change them. BINARY FILES: the workspace snapshot only accepts UTF-8 text. Never add binary files (fonts, images, wasm); web/public is not in scope. Inline SVG/CSS instead.",
+      "tool_policy": {
+        "mode": "automatic"
+      },
+      "permissions": {
+        "read": [
+          ".github",
+          ".gitignore",
+          "AGENTS.md",
+          "CLAUDE.md",
+          "README.md",
+          "context.md",
+          "deploy",
+          "design",
+          "pyproject.toml",
+          "uv.lock",
+          "scripts",
+          "specs",
+          "src",
+          "task-briefs",
+          "tests",
+          "web/src",
+          "web/e2e",
+          "web/.gitignore",
+          "web/.oxlintrc.json",
+          "web/README.md",
+          "web/context.md",
+          "web/index.html",
+          "web/package.json",
+          "web/playwright.config.ts",
+          "web/pnpm-lock.yaml",
+          "web/tsconfig.app.json",
+          "web/tsconfig.json",
+          "web/tsconfig.node.json",
+          "web/vite.config.ts"
+        ],
+        "write": [
+          "src",
+          "tests",
+          "scripts",
+          "deploy",
+          "README.md",
+          "AGENTS.md",
+          "context.md",
+          "specs/context.md",
+          "pyproject.toml",
+          "uv.lock",
+          ".gitignore",
+          "web/src",
+          "web/e2e",
+          "web/context.md",
+          "web/README.md",
+          "web/index.html",
+          "web/package.json",
+          "web/playwright.config.ts",
+          "web/pnpm-lock.yaml",
+          "web/tsconfig.app.json",
+          "web/tsconfig.json",
+          "web/tsconfig.node.json",
+          "web/vite.config.ts"
+        ],
+        "approved_commands": [],
+        "allow_approval_requests": false
+      },
+      "acceptance": {
+        "outputs": [
+          {
+            "name": "build-report",
+            "kind": "build_report",
+            "nonempty": true
+          }
+        ],
+        "reviewers": [
+          "review"
+        ],
+        "checks": [
+          {
+            "type": "command",
+            "command": {
+              "executable": "/bin/bash",
+              "args": [
+                "scripts/check.sh"
+              ],
+              "timeout_ms": 1800000
+            }
+          }
+        ]
+      },
+      "retry": {
+        "max_attempts": 4,
+        "automatic_transient": false
+      },
+      "timeout_ms": 14400000
+    },
+    {
+      "key": "review",
+      "role": "reviewer",
+      "assignment": {
+        "executor": "pi",
+        "provider": "openai-codex",
+        "model": "gpt-5.6-sol"
+      },
+      "review_of": "build",
+      "workspace_from": "build",
+      "dependencies": [
+        {
+          "task": "build",
+          "condition": "candidate_ready",
+          "on_failure": "block",
+          "version": null
+        }
+      ],
+      "description": "You are the independent REVIEWER: read-only, never edit files. Review the build candidate (git diff against HEAD plus untracked files) against task-briefs/ledgerlight-v1/stage4-agent.md and task-briefs/ledgerlight-v1/decisions.md. Run `bash scripts/check.sh` yourself. Check every Build item is done and tested, SKILL.md is complete, schema migration is safe on the previous stage DB, CLI/API/other entry points share one function per behavior, no secrets or real data. Focus: agent allowlist cannot reach writes without --propose, serve, shell or arbitrary argv; subprocess has no shell, timeout and output cap; API keys never in responses/logs/SSE; proposals re-validate on apply; iframe has no allow-same-origin and CSP blocks network; server binds 127.0.0.1 only; no @copilotkit or langchain deps; fake provider/STT only by env or setting. First line of review-report: VERIFIED or REFUTED. Then findings ranked by severity with path:line and the exact fix. Only REFUTE for real defects or missing brief items, not style. HARNESS: `.env.example` always appears deleted (harness strips .env*; never integrated) and untracked files under task-briefs/ and design/ are lead inputs — ignore both, never report or change them.",
+      "tool_policy": {
+        "mode": "automatic"
+      },
+      "permissions": {
+        "read": [
+          ".github",
+          ".gitignore",
+          "AGENTS.md",
+          "CLAUDE.md",
+          "README.md",
+          "context.md",
+          "deploy",
+          "design",
+          "pyproject.toml",
+          "uv.lock",
+          "scripts",
+          "specs",
+          "src",
+          "task-briefs",
+          "tests",
+          "web/src",
+          "web/e2e",
+          "web/.gitignore",
+          "web/.oxlintrc.json",
+          "web/README.md",
+          "web/context.md",
+          "web/index.html",
+          "web/package.json",
+          "web/playwright.config.ts",
+          "web/pnpm-lock.yaml",
+          "web/tsconfig.app.json",
+          "web/tsconfig.json",
+          "web/tsconfig.node.json",
+          "web/vite.config.ts"
+        ],
+        "write": [],
+        "approved_commands": [],
+        "allow_approval_requests": false
+      },
+      "acceptance": {
+        "outputs": [
+          {
+            "name": "review-report",
+            "kind": "independent_review",
+            "nonempty": true
+          }
+        ],
+        "checks": [],
+        "reviewers": []
+      },
+      "retry": {
+        "max_attempts": 3,
+        "automatic_transient": false
+      },
+      "timeout_ms": 3600000
+    }
+  ],
+  "loops": [
+    {
+      "key": "loop-build",
+      "kind": "correction",
+      "members": [
+        "build",
+        "review"
+      ],
+      "max_rounds": 3
+    }
+  ]
+}
