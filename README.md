@@ -11,6 +11,26 @@ and propose financial changes for explicit confirmation. Optional push-to-talk
 fills the message input without sending it.
 Licensed under the MIT License; see LICENSE and THIRD_PARTY_NOTICES.md.
 
+## Use with Claude Code
+
+This repo is also a Claude Code plugin marketplace. In Claude Code, run:
+
+```text
+/plugin marketplace add aidanrausch4231/ledgerlight
+/plugin install ledgerlight@ledgerlight
+```
+
+You get the ledgerlight MCP server (read tools, live UI and dashboard tools, and
+confirm-first proposal tools; see **MCP: external agents and inline charts**) and
+the `ledgerlight` skill, which drives the CLI. The plugin starts the server with
+`uvx --from git+https://github.com/aidanrausch4231/ledgerlight ledgerlight mcp`,
+so you need only [uv](https://docs.astral.sh/uv/), not a local install. Restart
+Claude Code after installing. Demo data needs no credentials (`ledgerlight demo seed`;
+use a separate data directory as shown in **Setup and try it**); Plaid keys are
+needed only for real bank linking. For the web UI and confirmation links, run
+`ledgerlight serve` from a built checkout (see **Setup and try it**). The plugin skill is a copy of
+`src/ledgerlight/SKILL.md`; `tests/test_plugin.py` fails if they differ.
+
 ## Ask a question and keep your Home layout
 
 Ask chat “hey what was my coffee spend like” and press Enter (Shift+Enter for a
